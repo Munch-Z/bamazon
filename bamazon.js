@@ -86,21 +86,21 @@ function buyQuery(queryParams) {
         if (res.length === 0) {
             return console.log('Insufficient quantity!');
         } else {
+            const cost = parseFloat(queryParams.quantity * res[0].price).toFixed(2);
+            console.log('Your total is: $'+ cost);
 
-            console.log('Your total is: $'+ parseFloat(queryParams.quantity * res[0].price).toFixed(2));
-
-            updateQuery(queryParams.id, queryParams.quantity, res[0].stock_quantity);
+            updateQuery(queryParams.id, queryParams.quantity, cost, res[0].stock_quantity);
         }
 
 
     })
 }
 
-function updateQuery(id, order, qty) {
+function updateQuery(id, order, sale, qty) {
 
     let newTotal = qty - order;
 
-    bamazonDB.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [parseInt(newTotal), id], (err, res, fields) => {
+    bamazonDB.query('UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?', [parseInt(newTotal), sale, id], (err, res, fields) => {
         if (err) return console.log(err);
         bamazonDB.end();
 

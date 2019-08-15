@@ -135,8 +135,56 @@ function orderItems() {
         
             })
         })
+    })
+}
 
+function addItem() {
 
+    inquirer.prompt([{
+        name: 'name',
+        type: 'input',
+        message: 'What is the name of this product?'
+    },
+    {
+        name: 'department',
+        type: 'input',
+        message: 'What department will this item be in?'
+    },
+    {
+        name: 'price',
+        type: 'input',
+        message: 'How much will this item be sold for?',
+        validate: function(value) {
+            let num = parseFloat(value);
 
+            if(isNaN(num)) {
+                console.log('\n That is not a valid number. Please try again.');
+                return false;
+            }
+
+            return true;
+        }
+    },
+    {
+        name: 'qty',
+        type: 'input',
+        message: 'How many of this item are you ordering?',
+        validate: function(value) {
+            let num = parseInt(value);
+
+            if(isNaN(num)) {
+                console.log('\n That is not a valid number. Please try again.');
+                return false;
+            }
+
+            return true;
+        }
+    } 
+    ]).then((data) => {
+        
+        bamazonDB.query('INSERT INTO products(product_name, department_name, price, stock_quantity) VALUES (?, ?, ?, ?)', [data.name, data.department, parseFloat(data.price), parseInt(data.qty)], (err, res, fields) => {
+            if (err) return console.log(err);
+            bamazonDB.end();
+        })
     })
 }
