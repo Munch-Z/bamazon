@@ -32,18 +32,17 @@ function app(obj){
 
         res.forEach((e) => {
            const {item_id, product_name, department_name, price, stock_quantity} = e;
-           console.table({ID: item_id, Product: product_name, Dept: department_name, Price: price, Quantity: stock_quantity});
+           console.table({ID: item_id, Product: product_name, Dept: department_name, Price: price.toFixed(2), Quantity: stock_quantity});
         })
 
         buyPrompt();
 
-        bamazonDB.end();
     })
 }
 
 function buyPrompt() {
     inquirer.prompt([{
-        name: 'item_id',
+        name: 'id',
         type: 'input',
         message: 'What is the ID of the item that you would like to buy?',
         validate: function(value) {
@@ -58,7 +57,7 @@ function buyPrompt() {
         }
     },
     {
-        name:'stock_quantity',
+        name:'quantity',
         type: 'input',
         message: 'How many would you like to buy?',
         validate: function(value) {
@@ -72,11 +71,35 @@ function buyPrompt() {
             return true;
         }
     }]).then((data) => {
-        console.log(data);
-        // buyQuery(obj);
+        buyQuery(data);
     })
 }
 
 function buyQuery(queryParams) {
-    //TODO
+
+    bamazonDB.query('SELECT * FROM products WHERE item_id = ? AND stock_quantity >= ?', [queryParams.id, queryParams.quantity], (err, res, fields) => {
+        if (err) return console.log(err);
+
+        if (res.length === 0) {
+            return console.log('Insufficient quantity!');
+        } else {
+
+            console.log('Your total is: $'+ parseFloat(queryParams.quantity * res[0].price).toFixed(2));
+
+            updateQuery(queryParams.id, queryParams.quantity, res[0].stock_quantity);
+        }
+
+
+    })
+}
+
+function updateQuery(id, order, qty) {
+
+    let newTotal = qty - order;
+
+    bamazonDB.query('UPDATE products SET stock_quantity = ? WHERE item_id = ?', [parseInt(newTotal), id], (err, res, fields) => {
+        if (err) return console.log(err);
+        bamazonDB.end();
+
+    })
 }
