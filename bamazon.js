@@ -9,6 +9,7 @@ function Config(host, user, pass, database) {
     this.database = database;
 }
 
+let bamazonDB;
 
 fs.readFile('test.txt', 'utf8', (err, data) => {
     if (err) throw err;
@@ -17,14 +18,16 @@ fs.readFile('test.txt', 'utf8', (err, data) => {
     
     const dbcon = new Config('localhost', 'root', password, 'bamazon');
 
-    app(dbcon);
+    bamazonDB = mysql.createConnection(dbcon);
+
+    getItems();
 })
 
 
-let bamazonDB;
 
-function app(obj){
-    bamazonDB = mysql.createConnection(obj);
+
+function getItems(){
+
     bamazonDB.connect();
 
     bamazonDB.query('SELECT * FROM products', (err, res, fields) => {
